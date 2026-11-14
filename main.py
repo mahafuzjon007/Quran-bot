@@ -12,7 +12,9 @@ from telegram.ext import (
 )
 
 # আপনার টেলিগ্রাম টোকেন এখানে বসান
-TOKEN = "8995555560:AAGJjnHhZMtXztmCHoYPnPsv2LWFXZLD4kM"
+import os
+
+TOKEN = os.environ.get("BOT_TOKEN")
 
 # quran.json ফাইল লোড করা
 with open("quran.json", "r", encoding="utf-8") as f:
