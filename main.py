@@ -210,13 +210,13 @@ def get_buttons(surah, ayah):
 
     keyboard = [
         [
-            InlineKeyboardButton("🎧 এই আয়াত শুনুন", callback_data=f"audio:{surah}:{ayah}"),
-            InlineKeyboardButton("▶️ পরপর শুনুন", callback_data=f"playlist:{surah}:{ayah}")
-        ],
-        [
             InlineKeyboardButton("⬅️ আগের আয়াত", callback_data=f"a:{prev_surah}:{prev_ayah}"),
             InlineKeyboardButton("পরের আয়াত ➡️", callback_data=f"a:{next_surah}:{next_ayah}")
-        ], 
+        ],
+        [
+            InlineKeyboardButton("🎧 এই আয়াত শুনুন", callback_data=f"audio:{surah}:{ayah}"),
+            InlineKeyboardButton("🔊 পরপর শুনুন", callback_data=f"playlist:{surah}:{ayah}")
+        ],
         [
             InlineKeyboardButton("📚 সকল সূরা", callback_data="sp:0"),
             InlineKeyboardButton("🏠 হোম", callback_data="home")
@@ -254,7 +254,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def surahs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("📚 পবিত্র আল-কুরআনের ১১৪টি সূরা:", reply_markup=surah_keyboard(0))
+    await update.message.reply_text("📚 পবিত্র আল-কুরআনের ১লাইট সূরা:", reply_markup=surah_keyboard(0))
 
 async def ayah(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
@@ -384,7 +384,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer("এই আয়াতের অডিও পাওয়া যায়নি।", show_alert=True)
         return
 
-    # সিরিয়াল অনুযায়ী পরপর প্লে করার হ্যান্ডলার (সঠিক ফরওয়ার্ড অর্ডারে প্লে হবে)
+    # সিরিয়াল অনুযায়ী পরপর প্লে করার হ্যান্ডলার
     if data.startswith("playlist:"):
         _, surah, start_ayah = data.split(":")
         surah = int(surah)
