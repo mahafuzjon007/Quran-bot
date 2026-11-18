@@ -1,4 +1,5 @@
 import json
+import os
 import re
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -11,9 +12,7 @@ from telegram.ext import (
     filters
 )
 
-# আপনার টেলিগ্রাম টোকেন এখানে বসান
-import os
-
+# আপনার টেলিগ্রাম টোকেন এখানে এনভায়রনমেন্ট ভেরিয়েবল থেকে লোড হবে
 TOKEN = os.environ.get("BOT_TOKEN")
 
 # quran.json ফাইল লোড করা
@@ -169,7 +168,6 @@ def surah_keyboard(page=0):
         row = []
         for j in range(i, min(i + 2, min(end, 114))):
             english, bangla = SURAHS[j]
-            # ইংরেজি নামের বদলে এখানে শুধু বাংলা নাম বা (নম্বর + বাংলা নাম) দেওয়া হলো
             row.append(InlineKeyboardButton(f"{j+1}. {bangla}", callback_data=f"s:{j+1}"))
         keyboard.append(row)
 
@@ -185,7 +183,6 @@ def surah_keyboard(page=0):
     keyboard.append([InlineKeyboardButton("🏠 হোম", callback_data="home")])
     return InlineKeyboardMarkup(keyboard)
 
-# নতুন লজিক: পরের বা আগের আয়াতে যাওয়ার সময় সূরা পরিবর্তন হ্যান্ডেল করা
 def get_next_ayah(surah, ayah):
     total = len(QURAN[str(surah)])
     if ayah < total:
@@ -194,7 +191,7 @@ def get_next_ayah(surah, ayah):
         if surah < 114:
             return surah + 1, 1
         else:
-            return 1, 1  # কুরআন শেষ হলে আবার ফাতিহায় ফিরে যাবে
+            return 1, 1
 
 def get_prev_ayah(surah, ayah):
     if ayah > 1:
@@ -207,17 +204,24 @@ def get_prev_ayah(surah, ayah):
         else:
             return 114, len(QURAN["114"])
 
+# আপডেট করা বোতাম যেখানে "শুনুন" এবং বাংলা লেবেল রয়েছে
 def get_buttons(surah, ayah):
     next_surah, next_ayah = get_next_ayah(surah, ayah)
     prev_surah, prev_ayah = get_prev_ayah(surah, ayah)
 
-    keyboard = [[
-        InlineKeyboardButton("⬅️ Previous", callback_data=f"a:{prev_surah}:{prev_ayah}"),
-        InlineKeyboardButton("Next ➡️", callback_data=f"a:{next_surah}:{next_ayah}")
-    ], [
-        InlineKeyboardButton("📚 All Surahs", callback_data="sp:0"),
-        InlineKeyboardButton("🏠 Home", callback_data="home")
-    ]]
+    keyboard = [
+        [
+            InlineKeyboardButton("🎧 শুনুন", callback_data=f"audio:{surah}:{ayah}")
+        ],
+        [
+            InlineKeyboardButton("⬅️ আগের আয়াত", callback_data=f"a:{prev_surah}:{prev_ayah}"),
+            InlineKeyboardButton("পরের আয়াত ➡️", callback_data=f"a:{next_surah}:{next_ayah}")
+        ], 
+        [
+            InlineKeyboardButton("📚 সকল সূরা", callback_data="sp:0"),
+            InlineKeyboardButton("🏠 হোম", callback_data="home")
+        ]
+    ]
     return InlineKeyboardMarkup(keyboard)
 
 def normalize_name(name):
@@ -236,15 +240,14 @@ def find_surahs(search):
             results.append(i + 1)
     return results
 
-# /start কমান্ড
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📖 King Fahad Bangla Quran Bot\n\n"
         "আসসালামু আলাইকুম ওয়া রহমাতুল্লাহি ওয়া বারাকাতুহু।\n\n"
         "পবিত্র আল-কুরআন পড়ুন বাংলা উচ্চারণ ও অর্থসহ।\n\n"
-        "💡 আপনি যেকোনো সময় সরাসরি লিখতে পারেন:\n"
+        "💡 আপনি যেকোনো সময় সরাসরি লিখতে পারেন:\n"
         "• `1 1` (সূরা ও আয়াত)\n"
-        "• `2:255` (আয়াতুল কুরসি)\n"
+        "• `2:255` (আয়াতুল কুরসি)\n"
         "• `Fatiha` অথবা `আল-বাকারা` (সূরার নাম)",
         reply_markup=main_menu(),
         parse_mode="Markdown"
@@ -262,7 +265,6 @@ async def ayah(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except (IndexError, ValueError, KeyError):
         await update.message.reply_text("সঠিকভাবে লিখুন:\n/ayah 1 1")
 
-# স্মার্ট এবং ইন্টারেক্টিভ টেক্সট হ্যান্ডলার
 async def smart_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
 
@@ -322,7 +324,6 @@ async def smart_message_handler(update: Update, context: ContextTypes.DEFAULT_TY
         parse_mode="Markdown"
     )
 
-# বোতামের কাজ হ্যান্ডেল করার ফাংশন
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -330,9 +331,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "home":
         await query.edit_message_text(
-            "📖 King Fahad Bangla Quran Bot\n\n"
+            "📖 Bangla Quran Bot\n\n"
             "আসসালামু আলাইকুম ওয়া রহমাতুল্লাহি ওয়া বারাকাতুহু।\n\n"
-            "পবিত্র আল-কুরআন পড়ুন বাংলা উচ্চারণ ও অর্থসহ।",
+            "পবিত্র আল-কুরআন পড়ুন বিশুদ্ধ আরবি তিলাওয়াত, বাংলা উচ্চারণ ও অর্থসহ।
+⚠️ বিশেষ দ্রষ্টব্য: আরবি ভাষার সঠিক মাখরাজ ও তাজবীদ বাংলা হরফ দিয়ে শতভাগ ফুটিয়ে তোলা সম্ভব নয়। তাই শুদ্ধভাবে কুরআন শিখতে অবশ্যই সাথে থাকা অডিও তেলাওয়াত শুনে অনুশীলন করুন।",
             reply_markup=main_menu()
         )
         return
@@ -365,6 +367,22 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text, reply_markup=get_buttons(surah, 1))
         return
 
+    # "শুনুন" বোতামের জন্য অডিও হ্যান্ডলার
+    if data.startswith("audio:"):
+        _, surah, ayah_no = data.split(":")
+        surah = int(surah)
+        ayah_no = int(ayah_no)
+        try:
+            audio_url = QURAN[str(surah)][str(ayah_no)]['audio']
+            await context.bot.send_audio(
+                chat_id=query.message.chat_id,
+                audio=audio_url,
+                caption=f"🎧 সূরা {surah} - আয়াত {ayah_no} (তেলাওয়াত)"
+            )
+        except (KeyError, ValueError):
+            await query.answer("এই আয়াতের অডিও পাওয়া যায়নি।", show_alert=True)
+        return
+
     if data.startswith("a:"):
         _, surah, ayah_no = data.split(":")
         surah = int(surah)
@@ -385,5 +403,5 @@ app.add_handler(CommandHandler("ayah", ayah))
 app.add_handler(CallbackQueryHandler(button))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, smart_message_handler))
 
-print("✅ King Fahad Bangla Quran Bot Running")
+print("✅ Bangla Quran Bot Running")
 app.run_polling()
