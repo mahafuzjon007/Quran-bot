@@ -339,16 +339,15 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    if data == "search":
-        await query.edit_message_text(
-            "🔍 আপনি কোন সূরা বা আয়াত খুঁজছেন?\n\n"
-            "চ্যাট বক্সে সরাসরি লিখে পাঠান:\n"
-            "• `1 1` (সূরা ১, আয়াত ১)\n"
-            "• `Baqarah` বা `আল-বাকারা`",
-            reply_markup=main_menu(),
-            parse_mode="Markdown"
-        )
-        return
+    if data == "home":
+    await query.edit_message_text(
+        "📖 Bangla Quran Bot\n\n"
+        "আসসালামু আলাইকুম ওয়া রহমাতুল্লাহি ওয়া বারাকাতুহু।\n\n"
+        "পবিত্র আল-কুরআন পড়ুন বিশুদ্ধ আরবি তিলাওয়াত, বাংলা উচ্চারণ ও অর্থসহ।\n\n"
+        "⚠️ বিশেষ দ্রষ্টব্য: বাংলা অক্ষর দিয়ে তেলাওয়াত শুদ্ধ হয় না, তাই 🔊 বাংলা অডিও শুনুন",
+        reply_markup=main_menu()
+    )
+    return
 
     if data.startswith("sp:"):
         page = int(data.split(":")[1])
