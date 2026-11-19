@@ -242,7 +242,7 @@ def find_surahs(search):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "📖 King Fahad Bangla Quran Bot\n\n"
+        "📖 Bangla Quran Bot\n\n"
         "আসসালামু আলাইকুম ওয়া রহমাতুল্লাহি ওয়া বারাকাতুহু।\n\n"
         "পবিত্র আল-কুরআন পড়ুন বাংলা উচ্চারণ ও অর্থসহ।\n\n"
         "💡 আপনি যেকোনো সময় সরাসরি লিখতে পারেন:\n"
@@ -331,7 +331,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "home":
         await query.edit_message_text(
-            "📖 King Fahad Bangla Quran Bot\n\n"
+            "📖 Bangla Quran Bot\n\n"
             "আসসালামু আলাইকুম ওয়া রহমাতুল্লাহি ওয়া বারাকাতুহু।\n\n"
             "পবিত্র আল-কুরআন পড়ুন বাংলা উচ্চারণ ও অর্থসহ।",
             reply_markup=main_menu()
